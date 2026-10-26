@@ -1,0 +1,112 @@
+# AWS VPC Peering with VPC-A to VPC-B Host
+
+## 1. Project Overview
+
+This project demonstrates communication between two Amazon Virtual Private Clouds (VPCs) using VPC Peering.
+
+It uses a VPCs host in a public subnet to provide SSH access to private EC2 instances. The public - private instances communicate using private IP addresses
+
+## 2. Objectives
+
+* Create two VPCs with non-overlapping CIDR blocks.
+* Configure public and private subnets.
+* Connect two VPCs using VPC Peering.
+* Configure route tables for inter-VPC communication.
+* Use a public subnet host to access private EC2 instances.
+* Configure security groups to control SSH access.
+* Test connectivity using private IP addresses.
+
+## 3. Architecture
+
+VPC-A
+
+* CIDR: `10.0.0.0/16`
+* Public subnet: `10.0.0.0/24`
+* Private subnet: `192.168.0.0/24`
+* Internet Gateway: Attached
+* public-subnet-vpc-1-instance: Public subnet
+* Private-EC2-VPC-A: Private subnet
+
+### Private-VPC-2
+
+* CIDR: `192.168.0.0/16`
+* private-subnet-vpc-2(B): `10.0.1.0/24`
+* private-ec2-vpc-2-instance: Private subnet
+
+### Connectivity
+
+VPC1 and VPC2 communicate through a VPC Peering Connection.
+
+The public host provides SSH access to the private instances. The private instances use private IP addresses for communication.
+
+## 4. AWS Services Used
+
+* Amazon VPC
+* Amazon EC2
+* VPC Peering
+* Internet Gateway
+* Route Tables
+* Public and Private Subnets
+* Security Groups
+* SSH
+
+5. Network Configuration
+Resource	                CIDR / Configuration
+VPC1	                        10.0.0.0/16
+VPC1 Public Subnet	        10.0.0.0/24
+VPC1 Private Subnet	        192.168.0.0/24
+VPC2	                        192.168.0.0/16
+VPC2 Private Subnet (current)	10.0.1.0/24
+
+Each `/24` subnet contains 256 total IPv4 addresses, of which AWS reserves 5.
+
+6. Routing
+
+After correcting the subnet CIDRs and establishing an active peering connection, configure these routes.
+
+VPC1 Public Route Table
+10.0.0.0/16 → local
+0.0.0.0/0 → Internet Gateway
+192.168.0.0/16 → VPC Peering Connection
+
+VPC1 Private Route Table
+10.0.0.0/16 → local
+192.168.0.0/16 → VPC Peering Connection
+
+VPC2 Private Route Table
+192.168.0.0/16 → local
+10.0.0.0/16 → VPC Peering Connection
+
+7. Security Configuration
+
+SSH access to the public bastion instance should be restricted to the administrator's public IP address.
+Private EC2 instances should not have public IP addresses.
+SSH access to private instances should be restricted using appropriate security group rules.
+Private network communication should use private IP addresses.
+Private EC2 instances should not receive direct inbound internet access.
+
+8. Testing
+
+Laptop-to-Bastion Connectivity: Successfully connected from the local laptop to the public EC2 bastion instance.
+
+Amazon EC2 Connect: Successfully accessed the EC2 instances using Amazon EC2 Connect.
+
+VPC1 Connectivity: Successfully tested connectivity to the private EC2 instance within VPC1 using ping requests.
+
+VPC2 Connectivity: Successfully tested connectivity to the private EC2 instance within VPC2 using ping requests.
+
+Cross-VPC Connectivity: Successfully verified communication between instances in both VPCs through the VPC Peering connection using their private IP addresses.
+
+All tests were successful, confirming that the configured routing, security group rules, and VPC Peering connection support the intended private network communication.
+
+9. Learning Outcomes
+
+Understanding VPCs, subnets, and CIDR blocks.
+Configuring VPC Peering and route tables.
+Understanding public and private EC2 instances.
+Configuring SSH access through a bastion host.
+Troubleshooting AWS network connectivity.
+
+10. Conclusion
+
+This project demonstrates how AWS VPC Peering enables private communication between two VPCs. A bastion host provides a controlled administrative entry point, while private EC2 instances communicate through private IP addresses without requiring public IP addresses.
